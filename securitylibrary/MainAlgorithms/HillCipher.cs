@@ -13,7 +13,47 @@ namespace SecurityLibrary
     {
         public List<int> Analyse(List<int> plainText, List<int> cipherText)
         {
-            throw new NotImplementedException();
+            List<int> key = new List<int>();
+            List<int> cipherText2 = new List<int>();
+            for(int z = 0; z < 4; z++)
+            {
+                key.Add(0);
+            }
+            
+
+            for(int i = 0; i < 26; i++)
+            {
+                for(int j = 0; j < 26; j++)
+                {
+                    for(int x = 0; x < 26; x++)
+                    {
+                        for(int y = 0; y < 26; y++)
+                        {
+                            key[0] = i;
+                            key[1] = j;
+                            key[2] = x;
+                            key[3] = y;
+
+                            cipherText2 = Encrypt(plainText, key);
+                            int count = 0;
+                            for (int c = 0; c < cipherText.Count; c++)
+                            {
+                                if (cipherText[c] == cipherText2[c] )
+                                {
+                                    count++;
+                                }
+
+                                if(count == cipherText.Count)
+                                {
+                                    return key;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return key;
         }
 
 
@@ -92,7 +132,22 @@ namespace SecurityLibrary
 
         public List<int> Analyse3By3Key(List<int> plainText, List<int> cipherText)
         {
-            throw new NotImplementedException();
+            List<int> key = new List<int>();
+            List<int> cipherText2 = new List<int>();
+            List<int> pPlainText = new List<int>();
+            List<int> pCipherText = new List<int>();
+
+            for(int i = 0; i < 9; i++)
+            {
+                pPlainText.Add(plainText[i]);
+                pCipherText.Add(cipherText[i]);
+            }
+
+            pPlainText = matrixInverse(pPlainText);
+
+            key = Encrypt(pPlainText, cipherText);
+
+            return key;
         }
 
         public double matrixDimentions(double listCounter)
