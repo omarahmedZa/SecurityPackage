@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,36 +10,105 @@ namespace SecurityLibrary
         
         public string Decrypt(string cipherText, string key)
         {
-            string plainText = "";
-            string newCipherText;
-            List<char> tempCipherText = new List<char>();
-            List<char> keyList = new List<char>();
-            List<char> editCipherText = new List<char>();
-            char[,] matrix = new char[5, 5];
-
-            keyList = keyTable(key);
-            listToMatrix(keyList, matrix);
-
-            for (int i = 0; i < cipherText.Length; i += 2)
-            {
-                char a;
-                char b;
-                decTwoL(matrix, cipherText[i], cipherText[i + 1], out a, out b);
-                tempCipherText.Add(a);
-                tempCipherText.Add(b);
-            }
-
-            newCipherText = string.Join("", tempCipherText);
-
-            if (cipherText.Length % 2 != 0)
-            {
-                newCipherText = newCipherText.Remove(newCipherText.Length - 1, 1);
-            }
-            editCipherText = handelCipherText(newCipherText);
-
-            plainText = string.Join("", editCipherText);
-
-            return plainText;
+            string alphabet = "abcdefghiklmnopqrstuvwxyz".ToUpper();
+            key = key.ToUpper();
+            string cipher = "";
+            Dictionary<char, bool> alphaDict = new Dictionary<char, bool>();
+            char[,] matrix = new char[5, 5];
+            int x = 0;
+            int y = 0;
+            foreach (char c in alphabet)
+            {
+                alphaDict.Add(c, false);
+            }
+            for (int i = 0; i < 25; i++)
+            {
+                if (i < key.Length)
+                {
+                    char currChar = key[i];
+
+                    if (currChar == 'J') currChar = 'I';
+
+                    if (!alphaDict[currChar])
+                    {
+                        matrix[x, y] = currChar;
+                        alphaDict[currChar] = true;
+                        if (++y == 5)
+                        {
+                            x++;
+                            y = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var item in alphaDict)
+                    {
+                        if (!item.Value)
+                        {
+                            matrix[x, y] = item.Key;
+                            if (++y == 5)
+                            {
+                                x++;
+                                y = 0;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            KeyValuePair<int, int> firstPos = new KeyValuePair<int, int>();
+            KeyValuePair<int, int> secPos = new KeyValuePair<int, int>();
+            for (int i = 0; i < cipherText.Length; i += 2)
+            {
+                char currChar = cipherText[i];
+                char secChar = cipherText[i + 1];
+                if (currChar == 'J') currChar = 'I';
+                if (secChar == 'J') secChar = 'I';
+                for (int j = 0; j < 5; j++)
+                {
+                    for (int k = 0; k < 5; k++)
+                    {
+                        if (matrix[j, k] == currChar)
+                        {
+                            firstPos = new KeyValuePair<int, int>(j, k);
+                        }
+                        if (matrix[j, k] == secChar)
+                        {
+                            secPos = new KeyValuePair<int, int>(j, k);
+                        }
+                    }
+                }
+                if (firstPos.Key == secPos.Key)
+                {
+                    int val = (firstPos.Value - 1 + 5) % 5;
+                    cipher += matrix[firstPos.Key, val];
+                    cipher += matrix[secPos.Key, (secPos.Value - 1 + 5) % 5];
+                }
+                else if (firstPos.Value == secPos.Value)
+                {
+                    cipher += matrix[(firstPos.Key - 1 + 5) % 5, firstPos.Value];
+                    cipher += matrix[(secPos.Key - 1 + 5) % 5, secPos.Value];
+                }
+                else
+                {
+                    cipher += matrix[firstPos.Key, secPos.Value];
+                    cipher += matrix[secPos.Key, firstPos.Value];
+                }
+            }
+            string plain = "";
+            for (int i = 0; i < cipher.Length; i++)
+            {
+                if (cipher[i] == 'X' && i < cipher.Length - 1 && cipher[i - 1] == cipher[i + 1] && i % 2 != 0 || cipher[i] == 'X' && i == cipher.Length - 1)
+                {
+                    // do nothing
+                }
+                else
+                {
+                    plain += cipher[i];
+                }
+            }
+            return plain.ToLower();
         }
 
         public string Encrypt(string plainText, string key)

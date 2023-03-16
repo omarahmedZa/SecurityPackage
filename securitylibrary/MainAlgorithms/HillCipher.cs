@@ -134,21 +134,62 @@ namespace SecurityLibrary
         {
             List<int> key = new List<int>();
             List<int> cipherText2 = new List<int>();
+            int[,] tempPT = new int[3, 3];
+            int[,] tempCT = new int[3, 3];
+            int[,] tempKey = new int[3, 3];
             List<int> pPlainText = new List<int>();
             List<int> pCipherText = new List<int>();
 
-            for(int i = 0; i < 9; i++)
+            for (int i = 0; i < 9; i++)
             {
                 pPlainText.Add(plainText[i]);
-                pCipherText.Add(cipherText[i]);
             }
 
             pPlainText = matrixInverse(pPlainText);
 
-            key = Encrypt(pPlainText, cipherText);
+            transformToMatrix(pPlainText, tempPT);
+
+            transformToMatrix(cipherText, tempCT);
+
+            tempKey = MultiplyMod26(tempPT, tempCT);
+
+            for (int j = 0; j < 3; j++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    key.Add(tempKey[j, k]);
+                }
+            }
 
             return key;
         }
+
+        public static int[,] MultiplyMod26(int[,] A, int[,] B)
+        {
+            int[,] result = new int[3, 3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        result[i, j] += A[i, k] * B[k, j];
+                    }
+
+                    if (result[i, j] < 0)
+                    {
+                        for (; result[i, j] < 0; result[i, j] += 26) ;
+                    }
+                    else
+                    {
+                        result[i, j] = result[i, j] % 26;
+                    }
+                }
+            }
+            return result;
+        }
+
+        
 
         public double matrixDimentions(double listCounter)
         {
