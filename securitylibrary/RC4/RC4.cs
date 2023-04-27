@@ -11,6 +11,8 @@ namespace SecurityLibrary.RC4
     /// </summary>
     public class RC4 : CryptographicTechnique
     {
+
+       
         public override string Decrypt(string cipherText, string key)
         {
             throw new NotImplementedException();
@@ -20,5 +22,7 @@ namespace SecurityLibrary.RC4
         {
             throw new NotImplementedException();
         }
+
+        
     }
 }
